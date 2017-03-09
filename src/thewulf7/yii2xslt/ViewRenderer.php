@@ -106,7 +106,7 @@ class ViewRenderer extends BaseViewRenderer
             $this->domXML = $variables;
         } else
         {
-            $xml = $this->xml_encode($variables);
+            $xml = $this->xml_encode($variables, true);
             $this->domXML = dom_import_simplexml($xml);
         }
 
@@ -153,7 +153,7 @@ class ViewRenderer extends BaseViewRenderer
      *
      * @return null|\SimpleXMLElement
      */
-    private function xml_encode($array, $node = null) {
+    private function xml_encode($array, $as_attributes = false, $node = null) {
         if (!isset($node))
         {
             $node = new \SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?><page></page>");
@@ -167,10 +167,16 @@ class ViewRenderer extends BaseViewRenderer
             if (is_array($value))
             {
                 $subnode = $node->addChild($key);
-                $node = $this->xml_encode($value, $subnode);
+                $node = $this->xml_encode($value, $as_attributes, $subnode);
             } else
             {
-                $node->addChild($key, $value);
+                if ($as_attributes)
+                {
+                    $node->addAttribute($key, $value);
+                } else
+                {
+                    $node->addChild($key, $value);
+                }
             }
         }
         return $node;
