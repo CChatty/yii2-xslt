@@ -78,9 +78,8 @@ class ViewRenderer extends BaseViewRenderer
     /**
      * Prepare template
      *
-     * @param mixed $template - path to the template
+     * @param mixed $templatesSource - path to the template
      *
-     * @return \DOMDocument
      * @throws \RuntimeException
      */
     protected function prepareXSL($templatesSource)
@@ -98,17 +97,21 @@ class ViewRenderer extends BaseViewRenderer
      *
      * @param $variables
      *
-     * @return \DOMDocument
+     * @throws \RuntimeException
      */
     protected function prepareXML($variables)
     {
         if ($variables instanceof \DOMDocument)
         {
-            return $variables;
+            $this->domXML = $variables;
+        } else
+        {
+            $xml = $this->xml_encode($variables);
+            $this->domXML = dom_import_simplexml($xml);
         }
 
-        $rootNode = $this->domXML->appendChild($this->domXML->createElement("result"));
-        $rootNode->setAttribute('xmlns:xlink', 'http://www.w3.org/TR/xlink');
+//        $rootNode = $this->domXML->appendChild($this->domXML->createElement("result"));
+//        $rootNode->setAttribute('xmlns:xlink', 'http://www.w3.org/TR/xlink');
 
 //        $translator = new xmlTranslator($this->domXML);
 //        $translator->translateToXml($rootNode, $variables);
@@ -140,5 +143,36 @@ class ViewRenderer extends BaseViewRenderer
                 $this->addRequestParams($xslt, $val, $prefix . $key . ".");
             }
         }
+    }
+
+    /**
+     * Convert data to XML
+     *
+     * @param $array
+     * @param null|\SimpleXMLElement $node
+     *
+     * @return null|\SimpleXMLElement
+     */
+    private function xml_encode($array, $node = null) {
+        if (!isset($node))
+        {
+            $node = new \SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?><page></page>");
+        }
+        foreach ($array as $key => $value)
+        {
+            if (is_numeric($key))
+            {
+                $key = 'item' . $key;
+            }
+            if (is_array($value))
+            {
+                $subnode = $node->addChild($key);
+                $node = $this->xml_encode($value, $subnode);
+            } else
+            {
+                $node->addChild($key, $value);
+            }
+        }
+        return $node;
     }
 }
