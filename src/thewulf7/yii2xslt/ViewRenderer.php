@@ -167,7 +167,7 @@ class ViewRenderer extends BaseViewRenderer
             if (is_array($value))
             {
                 $subnode = $node->addChild($key);
-                $node = $this->xml_encode($value, $as_attributes, $subnode);
+                $this->xml_encode($value, $as_attributes, $subnode);
             } else
             {
                 if ($as_attributes)
