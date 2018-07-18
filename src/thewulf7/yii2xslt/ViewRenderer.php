@@ -66,6 +66,17 @@ class ViewRenderer extends BaseViewRenderer
                 $node->nodeValue = Yii::t($category, $node->nodeValue);
             }
         }
+        //I18N attributes
+        $inputNodes = $this->domXSL->getElementsByTagName('input');
+        foreach ($inputNodes as $node) {
+            $attr = $node->getAttributeNode('i18n:attr');
+            if (!empty($attr) && $attr->prefix == 'i18n') {
+                $attributes = explode(' ', $attr->nodeValue);
+                foreach ($attributes as $attribute) {
+                    $node->getAttributeNode($attribute)->nodeValue = Yii::t($category, $node->getAttributeNode($attribute)->nodeValue);
+                }
+            }
+        }
 
         $xslt = new \xsltProcessor;
         $xslt->registerPHPFunctions();
