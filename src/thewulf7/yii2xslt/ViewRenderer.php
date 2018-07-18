@@ -58,6 +58,15 @@ class ViewRenderer extends BaseViewRenderer
         $this->prepareXSL($file);
         $this->prepareXML($params);
 
+        //I18N
+        $category = ltrim(str_replace(Yii::getAlias('@app/views'), '', $file), '/');
+        $textNodes = $this->domXSL->getElementsByTagName('text');
+        foreach ($textNodes as $node) {
+            if ($node->prefix == 'i18n') {
+                $node->nodeValue = Yii::t($category, $node->nodeValue);
+            }
+        }
+
         $xslt = new \xsltProcessor;
         $xslt->registerPHPFunctions();
         $xslt->importStylesheet($this->domXSL);
