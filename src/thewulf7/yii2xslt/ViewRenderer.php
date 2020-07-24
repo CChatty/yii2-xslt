@@ -26,7 +26,27 @@ class ViewRenderer extends BaseViewRenderer
     /**
      * @var array
      */
-    private $additionalVariables;
+    public $additionalVariables;
+
+    /**
+     * @var bool
+     */
+    public $registerPHPFunctions = false;
+
+    /**
+     * @var bool
+     */
+    public $addCookieToRequestParams = false;
+
+    /**
+     * @var bool
+     */
+    public $addRequestToRequestParams = false;
+
+    /**
+     * @var bool
+     */
+    public $addServerToRequestParams = false;
 
     /**
      * Instantiates and configures the xslt object.
@@ -79,7 +99,9 @@ class ViewRenderer extends BaseViewRenderer
         }
 
         $xslt = new \xsltProcessor;
-        $xslt->registerPHPFunctions();
+        if ($this->registerPHPFunctions) {
+            $xslt->registerPHPFunctions();
+        }
         $xslt->importStylesheet($this->domXSL);
 
         // Additional variables
@@ -87,10 +109,15 @@ class ViewRenderer extends BaseViewRenderer
         {
             $this->addRequestParams($xslt, $this->additionalVariables);
         }
-
-        $this->addRequestParams($xslt, $_COOKIE);
-        $this->addRequestParams($xslt, $_REQUEST);
-        $this->addRequestParams($xslt, $_SERVER, '_');
+        if ($this->addCookieToRequestParams) {
+            $this->addRequestParams($xslt, $_COOKIE);
+        }
+        if ($this->addRequestToRequestParams) {
+            $this->addRequestParams($xslt, $_REQUEST);
+        }
+        if ($this->addServerToRequestParams) {
+            $this->addRequestParams($xslt, $_SERVER, '_');
+        }
 
         return $xslt->transformToXML($this->domXML);
     }
@@ -182,7 +209,7 @@ class ViewRenderer extends BaseViewRenderer
         {
             if (is_numeric($key))
             {
-                $key = 'item' . $key;
+                $key = 'item';
             }
             if (is_array($value))
             {
